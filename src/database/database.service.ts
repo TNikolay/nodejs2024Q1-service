@@ -1,11 +1,15 @@
 import { Injectable } from '@nestjs/common';
-import { User } from '../user/entities/user.entity';
+import { Album } from '../album/entities/album.entity';
+import { Artist } from '../artist/entities/artist.entity';
 import { Track } from '../track/entities/track.entity';
+import { User } from '../user/entities/user.entity';
 
 @Injectable()
 export class DatabaseService {
   users: User[] = [];
   tracks: Track[] = [];
+  artists: Artist[] = [];
+  albums: Album[] = [];
 
   constructor() {
     this.fillTestData();
@@ -45,6 +49,34 @@ export class DatabaseService {
         artistId: null,
         albumId: null,
         duration: 2,
+      },
+    ];
+
+    this.artists = [
+      {
+        id: 'b47ee57c-51e9-4de0-8c64-000000000001',
+        name: '1',
+        grammy: true,
+      },
+      {
+        id: 'b47ee57c-51e9-4de0-8c64-000000000002',
+        name: '2',
+        grammy: false,
+      },
+    ];
+
+    this.albums = [
+      {
+        id: 'b47ee57c-51e9-4de0-8c64-000000000001',
+        name: '1',
+        year: 1,
+        artistId: null,
+      },
+      {
+        id: 'b47ee57c-51e9-4de0-8c64-000000000002',
+        name: '2',
+        year: 2,
+        artistId: null,
       },
     ];
   }

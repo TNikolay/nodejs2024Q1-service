@@ -1,17 +1,19 @@
+import { ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
-import { AppModule } from './app.module';
-import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
+import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import 'dotenv/config';
+import { AppModule } from './app.module';
 
 async function bootstrap() {
   const PORT = process.env.PORT || 4000;
+
   const app = await NestFactory.create(AppModule);
+  app.useGlobalPipes(new ValidationPipe());
 
   const options = new DocumentBuilder()
     .setTitle('Home Library Service')
     .setDescription('Check out the best Home Library Service API!')
     .setVersion('1.0')
-    .addServer(`http://localhost:${PORT}/`, 'Local environment') //.addTag('Your API Tag')
     .build();
 
   const document = SwaggerModule.createDocument(app, options);

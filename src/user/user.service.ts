@@ -19,7 +19,7 @@ export class UserService {
   }
 
   findOne(id: string) {
-    const user = this.db.users.find((u) => u.id === id);
+    const user = this.db.users.find((v) => v.id === id);
     if (user) return plainToInstance(User, user);
     throw new NotFoundException('User not found');
   }
@@ -38,7 +38,7 @@ export class UserService {
   }
 
   update(id: string, updateUserDto: UpdatePasswordDto) {
-    const user = this.db.users.find((u) => u.id === id);
+    const user = this.db.users.find((v) => v.id === id);
     if (!user) throw new NotFoundException('User not found');
     if (user.password !== updateUserDto.oldPassword)
       throw new ForbiddenException('Wrong password for current user');
@@ -50,7 +50,7 @@ export class UserService {
   }
 
   remove(id: string) {
-    const index = this.db.users.findIndex((u) => u.id === id);
+    const index = this.db.users.findIndex((v) => v.id === id);
     if (index === -1) throw new NotFoundException('User not found');
     this.db.users.splice(index, 1);
   }

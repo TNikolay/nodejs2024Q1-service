@@ -10,6 +10,15 @@ export class DatabaseService {
   tracks: Track[] = [];
   artists: Artist[] = [];
   albums: Album[] = [];
+  favs: {
+    artists: Set<string>; // favorite artists ids
+    albums: Set<string>; // favorite albums ids
+    tracks: Set<string>; // favorite tracks ids
+  } = {
+    artists: new Set<string>(),
+    albums: new Set<string>(),
+    tracks: new Set<string>(),
+  };
 
   constructor() {
     this.fillTestData();

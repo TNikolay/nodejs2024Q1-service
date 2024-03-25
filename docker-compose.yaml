@@ -1,0 +1,48 @@
+version: '3.9'
+services:
+  tn_hl_postgres:
+    container_name: tn_hl_postgres
+    build: src/database/
+    restart: always
+    env_file:
+      - .env
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    ports:
+      - '5432:5432'
+    volumes:
+      - tn_hl_pg_data:/var/lib/postgresql/data
+    networks:
+      - tn_hl_network
+
+  tn_hl_app:
+    container_name: tn_hl_app
+    build: .
+    restart: always
+    depends_on:
+      - tn_hl_postgres
+    env_file:
+      - .env
+    ports:
+      - '4000:4000'
+    networks:
+      - tn_hl_network
+
+  # pgadmin:
+  #   image: dpage/pgadmin4
+  #   container_name: my_pgadmin
+  #   environment:
+  #     PGADMIN_DEFAULT_EMAIL: admin@example.com
+  #     PGADMIN_DEFAULT_PASSWORD: admin
+  #   ports:
+  #     - '5050:80'
+  #   depends_on:
+  #     - postgres
+
+volumes:
+  tn_hl_pg_data:
+
+networks:
+  tn_hl_network:
+    driver: bridge

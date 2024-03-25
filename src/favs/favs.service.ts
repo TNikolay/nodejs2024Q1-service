@@ -3,12 +3,8 @@ import {
   NotFoundException,
   UnprocessableEntityException,
 } from '@nestjs/common';
-import { Album } from '../album/entities/album.entity';
-import { Artist } from '../artist/entities/artist.entity';
-import { DatabaseService } from '../database/database.service';
-import { Track } from '../track/entities/track.entity';
-import { PrismaService } from 'src/database/prisma.service';
 import { Prisma } from '@prisma/client';
+import { PrismaService } from 'src/database/prisma.service';
 
 @Injectable()
 export class FavsService {

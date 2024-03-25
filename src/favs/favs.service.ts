@@ -3,73 +3,167 @@ import {
   NotFoundException,
   UnprocessableEntityException,
 } from '@nestjs/common';
-import { Album } from '../album/entities/album.entity';
-import { Artist } from '../artist/entities/artist.entity';
-import { DatabaseService } from '../database/database.service';
-import { Track } from '../track/entities/track.entity';
+import { Prisma } from '@prisma/client';
+import { PrismaService } from 'src/database/prisma.service';
 
 @Injectable()
 export class FavsService {
-  constructor(private readonly db: DatabaseService) {}
+  constructor(private prisma: PrismaService) {}
 
-  findAll() {
-    const albums: Album[] = [];
-    for (const item of this.db.favs.albums) {
-      const album = this.db.albums.find((v) => v.id === item);
-      if (album) albums.push(album);
+  static FAVS_ID_NAME = '*';
+
+  async findAll() {
+    return this.prisma.favorites.findUnique({
+      where: { id: FavsService.FAVS_ID_NAME },
+      include: {
+        artists: {
+          select: {
+            id: true,
+            name: true,
+            grammy: true,
+          },
+        },
+        albums: {
+          select: {
+            id: true,
+            name: true,
+            year: true,
+            artistId: true,
+          },
+        },
+        tracks: {
+          select: {
+            id: true,
+            name: true,
+            duration: true,
+            artistId: true,
+            albumId: true,
+          },
+        },
+      },
+    });
+  }
+
+  async addAlbum(id: string) {
+    try {
+      const res = await this.prisma.album.update({
+        where: { id },
+        data: { favoritesId: FavsService.FAVS_ID_NAME },
+      });
+      return `Album "${res.name}" added to favs`;
+    } catch (error) {
+      if (
+        error instanceof Prisma.PrismaClientKnownRequestError &&
+        error.code === 'P2025'
+      )
+        throw new UnprocessableEntityException('Album not found');
+      else throw error;
     }
+  }
 
-    const artists: Artist[] = [];
-    for (const item of this.db.favs.artists) {
-      const artist = this.db.artists.find((v) => v.id === item);
-      if (artist) artists.push(artist);
+  async removeAlbum(id: string) {
+    try {
+      const currentStatus = await this.prisma.album.findUnique({
+        where: { id },
+        select: { favoritesId: true },
+      });
+
+      if (!currentStatus.favoritesId)
+        throw new NotFoundException('Album not found');
+
+      await this.prisma.album.update({
+        where: { id },
+        data: { favoritesId: null },
+      });
+    } catch (error) {
+      if (
+        error instanceof Prisma.PrismaClientKnownRequestError &&
+        error.code === 'P2025'
+      )
+        throw new NotFoundException('Track not found');
+      else throw error;
     }
+  }
 
-    const tracks: Track[] = [];
-    for (const item of this.db.favs.tracks) {
-      const track = this.db.tracks.find((v) => v.id === item);
-      if (track) tracks.push(track);
+  async addArtist(id: string) {
+    try {
+      const res = await this.prisma.artist.update({
+        where: { id },
+        data: { favoritesId: FavsService.FAVS_ID_NAME },
+      });
+      return `Artist "${res.name}" added to favs`;
+    } catch (error) {
+      if (
+        error instanceof Prisma.PrismaClientKnownRequestError &&
+        error.code === 'P2025'
+      )
+        throw new UnprocessableEntityException('Artist not found');
+      else throw error;
     }
-
-    return { artists, albums, tracks };
   }
 
-  addAlbum(id: string) {
-    const album = this.db.albums.find((v) => v.id === id);
-    if (!album) throw new UnprocessableEntityException('Album not found');
-    this.db.favs.albums.add(id);
-    return `Album "${album.name}" added to favs`;
+  async removeArtist(id: string) {
+    try {
+      const currentStatus = await this.prisma.artist.findUnique({
+        where: { id },
+        select: { favoritesId: true },
+      });
+
+      if (!currentStatus.favoritesId)
+        throw new NotFoundException('Artist not found');
+
+      await this.prisma.artist.update({
+        where: { id },
+        data: { favoritesId: null },
+      });
+    } catch (error) {
+      if (
+        error instanceof Prisma.PrismaClientKnownRequestError &&
+        error.code === 'P2025'
+      )
+        throw new NotFoundException('Artist not found');
+      else throw error;
+    }
   }
 
-  removeAlbum(id: string) {
-    const res = this.db.favs.albums.delete(id);
-    if (!res) throw new NotFoundException('Album not found');
-    return `Album ${id} was removed from favs`;
+  async addTrack(id: string) {
+    try {
+      const res = await this.prisma.track.update({
+        where: { id },
+        data: { favoritesId: FavsService.FAVS_ID_NAME },
+      });
+      return `Track "${res.name}" added to favs`;
+    } catch (error) {
+      if (
+        error instanceof Prisma.PrismaClientKnownRequestError &&
+        error.code === 'P2025'
+      )
+        throw new UnprocessableEntityException('Track not found');
+      else throw error;
+    }
   }
 
-  addArtist(id: string) {
-    const artist = this.db.artists.find((v) => v.id === id);
-    if (!artist) throw new UnprocessableEntityException('Artist not found');
-    this.db.favs.artists.add(id);
-    return `Artist "${artist.name}" added to favs`;
-  }
+  async removeTrack(id: string) {
+    try {
+      const currentStatus = await this.prisma.track.findUnique({
+        where: { id },
+        select: { favoritesId: true },
+      });
 
-  removeArtist(id: string) {
-    const res = this.db.favs.artists.delete(id);
-    if (!res) throw new NotFoundException('Artist not found');
-    return `Artist ${id} was removed from favs`;
-  }
+      if (!currentStatus.favoritesId)
+        throw new NotFoundException('Track not found');
 
-  addTrack(id: string) {
-    const track = this.db.tracks.find((v) => v.id === id);
-    if (!track) throw new UnprocessableEntityException('Track not found');
-    this.db.favs.tracks.add(id);
-    return `Track "${track.name}" added to favs`;
-  }
-
-  removeTrack(id: string) {
-    const res = this.db.favs.tracks.delete(id);
-    if (!res) throw new NotFoundException('Track not found');
-    return `Track ${id} was removed from favs`;
+      await this.prisma.track.update({
+        where: { id },
+        data: { favoritesId: null },
+      });
+    } catch (error) {
+      if (
+        error instanceof Prisma.PrismaClientKnownRequestError &&
+        error.code === 'P2025'
+      )
+        throw new NotFoundException('Track not found');
+      else throw error;
+    }
   }
 }

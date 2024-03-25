@@ -1,0 +1,39 @@
+version: '3.9'
+services:
+  tn_hl_postgres:
+    container_name: tn_hl_postgres
+    build: src/database/
+    restart: always
+    env_file:
+      - .env
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    ports:
+      - '${POSTGRES_PORT}:5432'
+    volumes:
+      - tn_hl_pg_data:/var/lib/postgresql/data
+    networks:
+      - tn_hl_network
+
+  tn_hl_app:
+    container_name: tn_hl_app
+    build: .
+    restart: always
+    depends_on:
+      - tn_hl_postgres
+    env_file:
+      - .env
+    ports:
+      - '${PORT}:4000'
+    volumes:
+      - ./src:/app/src
+    networks:
+      - tn_hl_network
+
+volumes:
+  tn_hl_pg_data:
+
+networks:
+  tn_hl_network:
+    driver: bridge

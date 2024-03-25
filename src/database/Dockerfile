@@ -1,7 +1,5 @@
 FROM postgres:latest
 
-#ENV POSTGRES_PASSWORD=mysecretpassword
-
 # Создаем директорию для монтирования данных PostgreSQL
 RUN mkdir -p /var/lib/postgresql/data
 
